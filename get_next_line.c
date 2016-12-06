@@ -12,85 +12,111 @@
 
 #include "get_next_line.h"
 
-int	prep_buff(t_rdr *rdr, char **tmp)
+int	clean_buff(t_rdr *rdr)
 {
 	int str_len;
+	char *tmp;
 
-	if (!rdr->stop)
-	{
-		str_len = (rdr->tot_buff - (rdr->eol - rdr->buff + 1));
-		*tmp = (char *)ft_memalloc(str_len + 1);
-		ft_memmove(*tmp, &rdr->buff[rdr->eol - rdr->buff + 1], str_len);
-		ft_memdel((void **)&rdr->buff);
-		rdr->char_buff = ft_strlen(*tmp);
-		rdr->buff = (char *)ft_memalloc(sizeof(char) * (rdr->char_buff));
-		ft_memmove(rdr->buff, *tmp, rdr->char_buff);
-		ft_memdel((void **)&(*tmp));
-		rdr->tot_buff = rdr->char_buff;
-	}
-	else
-	{
-		ft_memdel((void **)&rdr->buff);
-		rdr->eol = NULL;
-		rdr->tot_buff = 0;
-		rdr->char_buff = 0;
-		return (1);
-	}
+	str_len = (rdr->tot_buff - (rdr->eol - rdr->buff + 1));
+	if (!(tmp = (char *)ft_memalloc(str_len + 1)))
+		return (0);
+	ft_memmove(tmp, &rdr->buff[rdr->eol - rdr->buff + 1], str_len);
+	ft_memdel((void **)&rdr->buff);
+	rdr->char_buff = ft_strlen(tmp);
+	rdr->buff = (char *)ft_memalloc(sizeof(char) * (rdr->char_buff));
+	if (!(ft_memmove(rdr->buff, tmp, rdr->char_buff)))
+		return (0);
+	ft_memdel((void **)&(tmp));
+	rdr->tot_buff = rdr->char_buff;
 	return (1);
 }
 
-int	read_write(t_rdr *rdr, char **tmp, int *cnt)
+void	empty_buffer(t_rdr *rdr, char **line)
 {
+	*line = ft_strnew(rdr->eol - rdr->buff);
+	ft_memmove(*line, rdr->buff, rdr->eol - rdr->buff);
+}
+
+int	read_buff(t_rdr *rdr, char **line)
+{
+	char *tmp;
+	int		cnt;
+
 	while (!(rdr->eol = ft_memchr(rdr->buff, '\n', rdr->char_buff)))
 	{
-		*tmp = (char *)ft_memalloc(rdr->char_buff);
-		ft_memmove(*tmp, rdr->buff, rdr->char_buff);
+		if (!(tmp = (char *)ft_memalloc(rdr->char_buff)))
+			return (-1);
+		ft_memmove(tmp, rdr->buff, rdr->char_buff);
 		ft_memdel((void **)&rdr->buff);
-		rdr->buff = (char *)ft_memalloc(rdr->char_buff + BUFF_SIZE);
-		ft_memmove(rdr->buff, *tmp, rdr->char_buff);
-		ft_memdel((void **)&(*tmp));
-		if (!(*cnt = read(rdr->fd, rdr->buff + rdr->char_buff, BUFF_SIZE)))
+		if (!(rdr->buff = (char *)ft_memalloc(rdr->char_buff + BUFF_SIZE)))
+			return (-1);
+		ft_memmove(rdr->buff, tmp, rdr->char_buff);
+		ft_memdel((void **)&(tmp));
+		if (!(cnt = read(rdr->fd, rdr->buff + rdr->char_buff, BUFF_SIZE)))
 		{
 			rdr->eol = &rdr->buff[rdr->char_buff];
 			rdr->stop = 1;
-			break ;
+			if (!rdr->tot_buff)
+				return (0);
+			else
+			{
+				empty_buffer(rdr, line);
+				return (1);
+			}
 		}
-		if (*cnt == -1)
+		if (cnt == -1)
 			return (-1);
-		rdr->char_buff += *cnt;
-		rdr->tot_buff += *cnt;
+		rdr->char_buff += cnt;
+		rdr->tot_buff += cnt;
 	}
+	empty_buffer(rdr, line);
 	return (1);
 }
 
+// t_rdr	find_reader(t_list *readers, int fd)
+// {
+// 	t_list tmp;
+// 	t_rdr	rdr;
+
+// 	tmp = *readers;
+// 	while (tmp || tmp.content.fd != fd)
+// 		tmp = *(tmp.next);
+// 	if (tmp)
+// 		ft_lstadd(readers, ft_lstnew(rdr, 1));
+// 	else
+// 		rdr = tmp.content;
+// 	return (rdr);
+// }
+
 int	get_next_line(int fd, char **line)
 {
+	// static t_list	readers;
 	static t_rdr	rdr;
-	char			*tmp;
-	int				cnt;
 
-	tmp = NULL;
+	// rdr = find_reader(&readers, fd);
 	rdr.fd = fd;
+	if (rdr.stop)
+		return (0);
 	if (rdr.fd < 0)
 	{
 		*line = NULL;
 		return (-1);
 	}
-	// if (rdr.stop == 1)
-		// return (0);
-	// printf("0");
-	if (read_write(&rdr, &tmp, &cnt) == -1)
+	if (rdr.buff)
 	{
-		*line = NULL;
-		return (-1);
+		if(!(clean_buff(&rdr)))
+			return (-1);
+		if(ft_strlen(rdr.buff) == 0)
+		{
+			*line = NULL;
+			rdr.stop = 1;
+			return (0);
+		}
 	}
-	if (!cnt && !rdr.tot_buff)
+	else
 	{
-		*line = NULL;
-		return (0);
+		rdr.buff = (char *)ft_memalloc(sizeof(char) * (BUFF_SIZE));
+		rdr.tot_buff = BUFF_SIZE;
 	}
-	*line = ft_strnew(rdr.eol - rdr.buff);
-	ft_memmove(*line, rdr.buff, rdr.eol - rdr.buff);
-	prep_buff(&rdr, &tmp);
-	return (1);
+	return (read_buff(&rdr, line));
 }

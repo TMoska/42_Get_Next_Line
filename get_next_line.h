@@ -20,7 +20,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdio.h>
-# define BUFF_SIZE 32
+# define BUFF_SIZE 100
 
 typedef struct		s_rdr
 {
