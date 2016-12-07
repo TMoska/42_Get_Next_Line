@@ -73,50 +73,59 @@ int	read_buff(t_rdr *rdr, char **line)
 	return (1);
 }
 
-// t_rdr	find_reader(t_list *readers, int fd)
-// {
-// 	t_list tmp;
-// 	t_rdr	rdr;
-
-// 	tmp = *readers;
-// 	while (tmp || tmp.content.fd != fd)
-// 		tmp = *(tmp.next);
-// 	if (tmp)
-// 		ft_lstadd(readers, ft_lstnew(rdr, 1));
-// 	else
-// 		rdr = tmp.content;
-// 	return (rdr);
-// }
-
-int	get_next_line(int fd, char **line)
+t_rdr	*find_reader(t_list **readers, int fd)
 {
-	// static t_list	readers;
-	static t_rdr	rdr;
+	t_list	*tmp;
+	t_rdr *rdr;
 
-	// rdr = find_reader(&readers, fd);
-	rdr.fd = fd;
-	if (rdr.stop)
-		return (0);
-	if (rdr.fd < 0)
+	tmp = *readers;
+	while (tmp)
 	{
-		*line = NULL;
-		return (-1);
+		rdr = (t_rdr *)(tmp->content);
+		if (rdr->fd == fd)
+			return (rdr);
+		tmp = tmp->next;
 	}
-	if (rdr.buff)
-	{
-		if(!(clean_buff(&rdr)))
-			return (-1);
-		if(ft_strlen(rdr.buff) == 0)
-		{
-			*line = NULL;
-			rdr.stop = 1;
-			return (0);
-		}
-	}
-	else
-	{
-		rdr.buff = (char *)ft_memalloc(sizeof(char) * (BUFF_SIZE));
-		rdr.tot_buff = BUFF_SIZE;
-	}
-	return (read_buff(&rdr, line));
+	if(!(rdr = (t_rdr *)ft_memalloc(sizeof(t_rdr))))
+    return (0);
+	rdr->fd = fd;
+	if(!(tmp = ft_lstnew(rdr, sizeof(t_rdr))))
+    return (0);
+  ft_lstadd(readers, tmp);
+  free(rdr);
+	return ((t_rdr *)(tmp->content));
+}
+
+int get_next_line(int fd, char **line)
+{
+  static t_list *readers;
+  t_rdr *rdr;
+
+  if (fd < 0 || !line || !(rdr = find_reader(&readers, fd)))
+  {
+    *line = NULL;
+    return (-1);
+  }
+  if (rdr->stop)
+  {
+  	*line = NULL;
+    return (0);
+  }
+  if (rdr->buff)
+  {
+    if(!(clean_buff(rdr)))
+      return (-1);
+    if(ft_strlen(rdr->buff) == 0)
+    {
+      *line = NULL;
+      rdr->stop = 1;
+      return (0);
+    }
+  }
+  else
+  {
+    rdr->buff = (char *)ft_memalloc(sizeof(char) * (BUFF_SIZE));
+    rdr->tot_buff = BUFF_SIZE;
+  }
+  return (read_buff(rdr, line));
 }

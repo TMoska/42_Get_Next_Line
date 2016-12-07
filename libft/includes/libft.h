@@ -93,4 +93,5 @@ void				ft_lstmerge(t_list **begin_list1, t_list *begin_list2);
 void				ft_lstrmif(t_list **begin_list,
 					void *data_ref, int (*cmp)());
 char				*ft_itoa(int n);
+t_list  *ft_lstfind(t_list *begin_list, void *data_ref, int (*cmp)());
 #endif
