@@ -103,7 +103,7 @@ t_rdr		*find_reader(t_list **readers, int fd)
 	return ((t_rdr *)(tmp->content));
 }
 
-int			get_next_line(int fd, char **line)
+int			get_next_line(const int fd, char **line)
 {
 	static t_list	*readers;
 	t_rdr			*rdr;
