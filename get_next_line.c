@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmoska <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: moska <moska@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/05 19:27:38 by tmoska            #+#    #+#             */
-/*   Updated: 2016/12/06 00:28:02 by tmoska           ###   ########.fr       */
+/*   Updated: 2016/12/07 19:07:23 by moska            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,6 @@ int	clean_buff(t_rdr *rdr)
 	ft_memdel((void **)&(tmp));
 	rdr->tot_buff = rdr->char_buff;
 	return (1);
-}
-
-void	empty_buffer(t_rdr *rdr, char **line)
-{
-	*line = ft_strnew(rdr->eol - rdr->buff);
-	ft_memmove(*line, rdr->buff, rdr->eol - rdr->buff);
 }
 
 int	read_buff(t_rdr *rdr, char **line)
@@ -60,7 +54,8 @@ int	read_buff(t_rdr *rdr, char **line)
 				return (0);
 			else
 			{
-				empty_buffer(rdr, line);
+        *line = ft_strnew(rdr->eol - rdr->buff);
+        ft_memmove(*line, rdr->buff, rdr->eol - rdr->buff);
 				return (1);
 			}
 		}
@@ -69,7 +64,8 @@ int	read_buff(t_rdr *rdr, char **line)
 		rdr->char_buff += cnt;
 		rdr->tot_buff += cnt;
 	}
-	empty_buffer(rdr, line);
+  *line = ft_strnew(rdr->eol - rdr->buff);
+  ft_memmove(*line, rdr->buff, rdr->eol - rdr->buff);
 	return (1);
 }
 
