@@ -6,7 +6,7 @@
 /*   By: tmoska <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/05 19:30:07 by tmoska            #+#    #+#             */
-/*   Updated: 2016/12/05 19:44:00 by tmoska           ###   ########.fr       */
+/*   Updated: 2016/12/07 19:54:48 by tmoska           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdio.h>
-# define BUFF_SIZE 100
+# define BUFF_SIZE 32
 
 typedef struct		s_rdr
 {
