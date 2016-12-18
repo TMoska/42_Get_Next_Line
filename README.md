@@ -45,6 +45,14 @@ int       main(int ac, char **av)
 gcc -Wall -Werror -Wextra get_next_line.c get_next_line.h main.c -I./libft/includes -L./libft -lft
 ./a.out <file_name>
 ```
+Studying at 42?
+---
+
+You might be interested in checking my other repositories:
+- [libft](https://www.github.com/TMoska/libft)
+- [sastantua](https://github.com/TMoska/sastantua)
+- [42_exams](https://github.com/TMoska/42_exams)
+- [fillit](https://github.com/TMoska/fillit)
 
 Contributing
 ---
